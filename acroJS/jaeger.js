@@ -33,9 +33,9 @@ SourceList["SGttEH:J"] = {
 };
 
 // Add a persistent function, as a local variable it won't be usable after re-opening the sheet
-//MMBH_BhHemocraftDie = function(n) {
-//	return "1d" + (n < 5 ? 4 : n < 11 ? 6 : n < 17 ? 8 : 10);
-//};
+SGttEHJ_MomentumDie = function(n) {
+	return "1d" + (n < 5 ? 6 : n < 11 ? 8 : n < 17 ? 10);
+};
 
 ClassList["jaeger"] = {
 	regExpSearch : /^(?=.*jaeger).*$/i,
@@ -59,134 +59,253 @@ ClassList["jaeger"] = {
 	equipment : "Jaeger starting equipment:\n \u2022 Scale mail -or- leather armor;\n \u2022 two martial weapons;\n \u2022 A pistol and pouch of 20 bullets -or- any two simple weapons;\n \u2022 An explorer's pack -or- a dungeoneer's pack.\n\nAlternatively, choose 4d4 \xD7 10 gp worth of starting equipment instead of both the class' and the background's starting equipment.",
 	subclasses : ["Jaeger Chapters", ["Absolute Chapter", "Heretic Chapter", "Marauder Chapter", "Salvation Chapter", "Sanguine Chapter"]],
 	attacks : levels.map(function(n){return n < 5 ? 1 : 2}),
-	abilitySave : 4,
 	features : {
-		"blood maledict" : {
-			name : "Blood Maledict",
-			source : [["MM:BH", 3]],
+		"Focus" : {
+			name : "Focus",
+			source : [["SGttEH:J", 3]],
 			minlevel : 1,
 			description : desc([
-				'I can use a Blood Curse on targets with blood; Use the "Choose Features" button above',
-				"I can amplify it by taking my hemocraft die in damage; Amplified it works on any target",
-				"Whenever I learn a new Blood Curse, I can also replace a curse I know with another"
+				'I can use a Focus Point to do a Focus Art; Use the "Choose Features" button above',
+				"I can regain all Focus Points after a long rest",
+				"Whenever I roll initiative with no focus points, I regain a focus point",
+				"Whenever I roll a 20 on a saving throw or an attack roll against a hostile creatre, I regain a focus point",
+				"I know the Focus Arts \"Weapon Parry\" and \"Dodge Step\"",
+				"Whenever I learn a new Focus Art, I can also replace a Focus Art I know with another",
 			]),
 			additional : levels.map(function (n) {
-				return (n < 6 ? 1 : n < 10 ? 2 : n < 14 ? 3 : n < 18 ? 4 : 5) + " curse" + (n < 6 ? "" : "s") + " known";
+				return (n < 2 ? 3 : n < 7 ? 2 : n < 13 ? 3 : n < 17 ? 4 : 5) + " focus art" + (n < 6 ? "" : "s") + " known";
 			}),
 			usages : levels.map(function (n) {
-				return n < 6 ? 1 : n < 13 ? 2 : n < 17 ? 3 : 4;
+				return n < 1 ? 3 : n < 2 ? 4 : n < 9 ? 5 : n < 13 ? 6 : n < 17 ? 7 : 8;
 			}),
-			recovery : "short rest",
-			extraname : "Blood Curse",
-			extrachoices : ["Blood Curse of the Anxious", "Blood Curse of Binding", "Blood Curse of Bloated Agony", "Blood Curse of Exposure", "Blood Curse of the Eyeless", "Blood Curse of the Fallen Puppet", "Blood Curse of the Marked", "Blood Curse of the Muddled Mind"],
+			recovery : "long rest",
+			extraname : "Focus Art",
+			extrachoices : ["Weapon Parry", "Dodge Step", "Aerial Vault", "Elemental Art", "Focus Mind", "Flourish", "I Don't Want To Be Eaten Today", "Jaeger's Rush", "Jaeger's Assessment"],
 			extraTimes : levels.map(function (n) {
-				return n < 6 ? 1 : n < 10 ? 2 : n < 14 ? 3 : n < 18 ? 4 : 5;
+				return n < 2 ? 3 : n < 7 ? 2 : n < 13 ? 3 : n < 17 ? 4 : 5;
 			}),
-			"blood curse of the anxious" : {
-				name : "Blood Curse of the Anxious",
-				source : [["MM:BH", 11]],
-				description : " [Amplify 1\xD7 per long rest]" + desc([
-					"As a bonus action, I can make a creature within 30 ft more susceptible to forceful influence",
-					"Until my next turn ends, all Charisma (Intimidation) checks against it are made with adv.",
-					"\u2022 Amplify (once per long rest): Disadv. on next Wis save the target makes before curse ends"
-				]),
-				action : [["bonus action", ""]],
-				extraLimitedFeatures : [{
-					additional : "Amplify Blood Curse of the Anxious",
-					usages : 1,
-					recovery : "long rest"
-				}]
-			},
-			"blood curse of binding" : {
-				name : "Blood Curse of Binding",
-				source : [["MM:BH", 11]],
+			"weapon parry" : {
+				name : "Weapon Parry",
+				source : [["SGttEH:J", 115]],
 				description : desc([
-					"As a bonus action, I can bind a target I can see within 30 ft up to one size larger than me",
-					"It must make a Str save or have 0 speed and can't use reactions until my next turn ends",
-					"\u2022 Amplify: The curse lasts for 1 minute and can affect creatures of any size",
-					"  At the end of each of the target's turns, it can make another Str save to end the curse"
+					"As a reaction to being hit by a creature I can see within range of a weapon I am holding, I can",
+					"expend 1 Focus Point to make a special weapon attack against that creature. This attack does no damage, but",
+					"instead blocks an amount of damage from the incoming attack equal to the weapon's damage roll",
+					"(including my ability modifier), unless my attack roll is a 1. On a 20, any weapon damage dice are rolled",
+					"twice (like a critical hit would be), and if this total fully blocks the incoming attack, the target is stunned until",
+					"the start of its next turn."
 				]),
-				action : [["bonus action", ""]]
+				action : [["reaction", ""]],
 			},
-			"blood curse of bloated agony" : {
-				name : "Blood Curse of Bloated Agony",
-				source : [["MM:BH", 11]],
+			"dodge step" : {
+				name : "Dodge Step",
+				source : [["SGttEH:J", 115]],
 				description : desc([
-					"As a bonus action, I can curse a target I can see within 30 ft until the end of my next turn",
-					"It has disadv. on Str \u0026 Dex checks and takes 1d8 necrotic damage if it attacks on its turn",
-					"\u2022 Amplify: Lasts for 1 min; After each of its turns, the target can make Con save to end it"
-				]),
-				action : [["bonus action", ""]]
-			},
-			"blood curse of exposure" : {
-				name : "Blood Curse of Exposure",
-				source : [["MM:BH", 11]],
-				description : desc([
-					"As a reaction when a target I can see in 30 ft is hit with an attack or spell, I can weaken it",
-					"Until the end of the turn, it loses resistance to the damage types of the initial attack/spell",
-					"\u2022 Amplify: Its immunities to the damage types count as resistance until the end of the turn"
+					"As a reaction to being attacked by a creature I can see, if my speed is not 0, I can expend 1 Focus",
+					"Point to move 5 feet without provoking opportunity attacks and make a Dexterity saving throw with a DC",
+					"equal to the attacker's attack roll (including modifiers). On a success, I evade completely and take no",
+					"damage. On a failure, I halve the attack's damage against me."
 				]),
 				action : [["reaction", ""]]
 			},
-			"blood curse of the eyeless" : {
-				name : "Blood Curse of the Eyeless",
-				source : [["MM:BH", 11]],
+			"aerial vault" : {
+				name : "Aerial Vault",
+				source : [["SGttEH:J", 126]],
 				description : desc([
-					"As a reaction when a creature I can see in 30 ft makes an attack roll, I can intervene",
-					"Before I know if it hits or not, I roll a hemocraft die and subtract it from the attack roll",
-					"Creatures immune to blindness are not affected by this",
-					"\u2022 Amplify: apply to all of the target's attacks this turn; Separate hemocraft die roll for each"
+					"When I make a jump, I can expend 1 Focus Point to double my jumping distance for that jump, and I",
+					"can ignore difficult terrain until the end of my turn. When I use this Focus Art, the maximum distance",
+					"I can jump isn’t limited by my walking speed."
 				]),
-				action : [["reaction", ""]]
 			},
-			"blood curse of the fallen puppet" : {
-				name : "Blood Curse of the Fallen Puppet",
-				source : [["MM:BH", 12]],
+			"elemental art" : {
+				name : "Elemental Art",
+				source : [["SGttEH:J", 126]],
 				description : desc([
-					"As a reaction when a creature I can see in 30 ft drops to 0 HP, I can make it attack",
-					"It makes one weapon attack against a target of my choice within its attack range",
-					"\u2022 Amplify: Before making the attack, I can move the creature up to half its speed",
-					"   Also, the attack and damage roll gain a bonus equal to my Intelligence modifier (min 1)"
-				]),
-				action : [["reaction", ""]]
-			},
-			"blood curse of the marked" : {
-				name : "Blood Curse of the Marked",
-				source : [["MM:BH", 12]],
-				description : desc([
-					"As a bonus action, I can mark an enemy within 30 ft of me until the end of my turn",
-					"When I deal rite damage to the marked target, I deal an additional hemocraft die",
-					"\u2022 Amplify: My next attack against the target before the end of my turn has advantage"
+					"As a bonus action, I expend 1 Focus Point and touch a weapon I'm carrying. Choose between acid, cold,",
+					"fire, or lightning. For 1 minute, the weapon deals that damage type instead of its normal type."
 				]),
 				action : [["bonus action", ""]]
 			},
-			"blood curse of the muddled mind" : {
-				name : "Blood Curse of the Muddled Mind",
-				source : [["MM:BH", 12]],
+			"focus mind" : {
+				name : "Focus Mind",
+				source : [["SGttEH:J", 126]],
 				description : desc([
-					"As a bonus action, I can curse a creature I can see in 30 ft that is concentrating on a spell",
-					"That creature has disadv. on its next concentration save before the end of my next turn",
-					"\u2022 The target has disadv. on all concentration saves before the end of my next turn"
+					"As a reaction to making a saving throw against being charmed, frightened, or having my mind read or",
+					"influenced, I can expend 1 Focus Point to gain advantage on the roll. If I already have advantage on",
+					"the roll, I can reroll one of the dice once."
+				]),
+				action : [["reaction", ""]]
+			},
+			"flourish" : {
+				name : "Flourish",
+				source : [["SGttEH:J", 126]],
+				description : desc([
+					"As a bonus action, I can expend 1 Focus Point and gain 1 additional Momentum die (gaining 2",
+					"Momentum dice in total, which includes the die gained through the Momentum feature from expending the",
+					"Focus Point on Flourish)."
+				]),
+				action : [["bonus action", ""]]
+			},
+			"i don't want to be eaten today" : {
+				name : "I Don't Want To Be Eaten Today",
+				source : [["SGttEH:J", 126]],
+				description : desc([
+					"As a reaction to becoming grappled or restrained by an effect that has an escape DC or to making a contested",
+					"roll against these conditions, I can expend 1 Focus Point to attempt to immediately escape the effect,",
+					"making an Athletics or Acrobatics check against the escape DC, or to gain advantage on the contested roll."
+				]),
+				action : [["bonus action", ""]]
+			},
+			"jaeger's rush" : {
+				name : "Jaeger's Rush",
+				source : [["SGttEH:J", 126]],
+				description : desc([
+					"As a bonus action, I can expend 1 Focus Point to take the Dash Action"
+				]),
+				action : [["bonus action", ""]]
+			}
+			"jaeger's assessment" : {
+				name : "Jaeger's Assessment",
+				source : [["SGttEH:J", 126]],
+				description : desc([
+					"As a bonus action, I can expend 1 Focus Point to make an Investigation check against a creature I can",
+					"see within 60 feet of me, contested by its Deception check. On success, I learn its creature type, AC, any",
+					"resistances or immunities it has to damage or conditions, and any spells it is under the effect of.",
+					"Alternatively, when I take this bonus action, I can take the Search action."
+				]),
+				action : [["bonus action", ""]]
+			},
+		},
+		"Finisher" : {
+			name : "Finisher",
+			source : [["SGttEH:J", 116]],
+			minlevel : 1,
+			description : desc([
+				desc([
+				"Starting at 2nd level, any time I expend a Focus Point, I gain 1 Momentum die, which is a d6. This die",
+				"changes as I gain jaeger levels. I can have a maximum number of Momentum",
+				"dice equal to my proficiency bonus + my Strength or Dexterity modifier (whichever is higher). Whenever I",
+				"gain a Momentum die, or if I attack or end my turn within 5 feet of a hostile creature, all of my",
+				"Momentum dice last until the end of my next turn. While I have 1 or more Momentum dice, I can",
+				"expend all of my Momentum dice to execute a Finisher. I know the Brutal Finisher. I learn one additional",
+				"Finisher of my choice at 4th, 6th, 8th, and 12th level, and may gain others through Jaeger Chapter features."
+			]),
+			]),
+			additional : levels.map(function (n) {
+				return (n < 2 ? 1 : n < 4 ? 2 : n < 6 ? 3 : n < 8 ? 4 : 5) + " finisher" + (n < 6 ? "" : "s") + " known";
+			}),
+			extraname : "Finisher",
+			extrachoices : ["Brutal Finisher", "Breaking Blow", "Chasing Finisher", "Hemorrhaging Wound", "Opportunistic Shot", "Viscious Finisher", "Volley Finisher"],
+			extraTimes : levels.map(function (n) {
+				return n < 2 ? 1 : n < 4 ? 2 : n < 6 ? 3 : n < 8 ? 4 : 5;
+			}),
+			"brutal finisher" : {
+				name : "Brutal Finisher",
+				source : [["SGttEH:J", 116]],
+				description : desc([
+					"When I hit a creature with an attack, I can expend all of my Momentum dice and add them to the",
+					"damage roll. If I reduce the target to 0 hit points with this Finisher, or the target is reduced to 0 hit",
+					"points before the start of my next turn, I regain 1 Focus Point."
+				]),
+			},
+			"breaking blow" : {
+				name : "Breaking Blow",
+				source : [["SGttEH:J", 126]],
+				description : desc([
+					"When I hit a creature with an attack, I can expend all of my Momentum dice to force the target to make",
+					"a saving throw, suffering a condition for 1 minute on a failure. The DC of the save is 8 + my Strength or",
+					"Dexterity modifier (my choice) + my proficiency bonus. The type of saving throw and the condition",
+					"depend on the number of Momentum dice I have when I use this Finisher. I can choose to inflict a",
+					"condition that requires fewer Momentum dice than I expend, but all Momentum dice are expended",
+					"regardless of the condition selected. \nThe target can repeat its saving throw against the",
+					"condition at the end of each of its turns, ending the effect on a success. If the condition inflicted is Prone,",
+					"they do not need to pass a subsequent save and can end the condition by standing as normal instead.",
+					"\nIf the target fails its initial save against the effect, I regain 1 Focus Point.",
+					"\n1 momentum dice, make a strength saving throw or be knocked prone",
+					"\n2 momentum dice, make a constitution saving throw or be blinded",
+					"\n3 momentum dice, make a strength saving throw or be restrained",
+					"\n4 momentum dice, make a constitution saving throw or be stunned",
+					"\n5+ momentum dice, make a constitution saving throw or be paralyzed"
+				]),
+			},
+			"chasing finisher" : {
+				name : "Chasing Finisher",
+				source : [["SGttEH:J", 127]],
+				description : desc([
+					"As a bonus action, I expend all of my Momentum dice to move 10 feet per die expended before making a",
+					"melee weapon attack. On a hit, add the expended Momentum dice to the attack’s damage roll.",
+					"\nIf I move at least 30 feet using the Finisher, I regain 1 Focus Point."
+				]),
+				action : [["bonus action", ""]]
+			},
+			"hemorrhaging wound" : {
+				name : "Hemorrhaging Wound",
+				source : [["SGttEH:J", 127]],
+				description : desc([
+					"When I hit a creature with an attack, I can expend all of my Momentum dice to rend a vicious bleeding",
+					"wound. At the end of each of the creature's turns, it loses hit points equal to the Momentum dice",
+					"expended. Each time it takes damage from this effect, the number of dice of damage it takes at the end of its",
+					"next turn is reduced by 1, and the bleeding stops when the number of dice would be reduced to 0. A bleeding",
+					"creature can make a Constitution saving throw at the end of each of its turns, after taking the damage,",
+					"ending the effect on a success. The DC of the save is 8 + my Strength or Dexterity modifier (my choice) +",
+					"my proficiency bonus + half the number of dice remaining, rounded down.\n",
+					"Applying a new bleed while the target is still bleeding does not stack, but instead refreshes the number of",
+					"dice of damage taken from the bleed to the higher of the two values."
+				]),
+			},
+			"opportunistic shot" : {
+				name : "Opportunistic Shot",
+				source : [["SGttEH:J", 127]],
+				description : desc([
+					"As a reaction when a creature within 20 feet of me becomes paralyzed, restrained, or stunned, I can",
+					"expend all of my Momentum dice and make a single weapon attack with a firearm I am holding. On a hit,",
+					"the target takes damage equal to the weapon's damage roll plus the expended Momentum dice, it is knocked",
+					"prone, and I regain 1 Focus Point."
+				]),
+				action : [["reaction", ""]]
+			},
+			"viscious finisher" : {
+				name : "Viscious Finisher",
+				source : [["SGttEH:J", 127]],
+				description : desc([
+					"As a bonus action, I expend all of my Momentum dice to form a spectral beast claw around one hand and",
+					"make a melee weapon attack with it against a creature within 5 feet of me. I can use my choice of my",
+					"Strength or Dexterity modifier for the attack and damage rolls of this attack. On a hit, the target takes",
+					"magical slashing damage equal to 1d12 + my Strength modifier + the Momentum dice expended. This attack",
+					"has a higher critical hit range based on the number of Momentum dice expended, reducing the roll needed by",
+					"2 for each die, up to a maximum of scoring a critical hit on a 10-20 with 5 Momentum dice.",
+					"\nIf the Finisher is a critical hit, I regain 1 Focus Point."
+				]),
+				action : [["bonus action", ""]]
+			},
+			"volley finisher" : {
+				name : "Volley Finisher",
+				source : [["SGttEH:J", 127]],
+				description : desc([
+					"As a bonus action while I am holding a firearm, I can expend all of my Momentum dice to reload and fire a spray of shots at blinding speed. Each creature in a 30-",
+					"foot cone must make a Dexterity saving throw (DC = 8 + my Dexterity modifier + my proficiency bonus). On a",
+					"failure, a creature takes piercing damage equal to the Momentum dice expended.",
+					"If the Finisher damages 2 or more creatures, I regain 1 Focus Point."
 				]),
 				action : [["bonus action", ""]]
 			}
 		},
-		"hemocraft die" : {
-			name : "Hemocraft Die",
-			source : [["MM:BH", 3]],
-			minlevel : 1,
+		"momentum die" : {
+			name : "Momentum Die",
+			source : [["SGttEH:J", 116]],
+			minlevel : 2,
 			description : "",
-			additional : levels.map(MMBH_BhHemocraftDie)
+			additional : levels.map(SGttEHJ_MomentumDie)
 		},
 		"hunter's bane" : {
 			name : "Hunter's Bane",
-			source : [["MM:BH", 3]],
+			source : [["SGttEH:J", 3]],
 			minlevel : 1,
 			description : "\n   I get adv. on Int checks to recall info about, and Survival to track, fey, fiends, or undead"
 		},
 		"crimson rite" : {
 			name : "Crimson Rite",
-			source : [["MM:BH", 4]],
+			source : [["SGttEH:J", 4]],
 			minlevel : 2,
 			description : desc([
 				"As a bonus action, I can imbue a weapon with a rite; A weapon can hold only one rite",
@@ -204,34 +323,34 @@ ClassList["jaeger"] = {
 				return n < 6 ? 1 : n < 14 ? 2 : 3;
 			}),
 			"\x1Bprimal rite of the flame" : {
-				source : [["MM:BH", 4]],
+				source : [["SGttEH:J", 4]],
 				name : "Rite of the Flame",
 				description : " [fire damage]"
 			},
 			"\x1Bprimal rite of the frozen" : {
-				source : [["MM:BH", 4]],
+				source : [["SGttEH:J", 4]],
 				name : "Rite of the Frozen",
 				description : " [cold damage]"
 			},
 			"\x1Bprimal rite of the storm" : {
-				source : [["MM:BH", 4]],
+				source : [["SGttEH:J", 4]],
 				name : "Rite of the Storm",
 				description : " [lightning damage]"
 			},
 			"esoteric rite of the dead" : {
-				source : [["MM:BH", 4]],
+				source : [["SGttEH:J", 4]],
 				name : "Rite of the Dead",
 				description : " [necrotic damage]",
 				prereqeval : function() { return classes.known['blood hunter'].level >= 14 }
 			},
 			"esoteric rite of the oracle" : {
-				source : [["MM:BH", 4]],
+				source : [["SGttEH:J", 4]],
 				name : "Rite of the Oracle",
 				description : " [psychic damage]",
 				prereqeval : function() { return classes.known['blood hunter'].level >= 14 }
 			},
 			"esoteric rite of the roar" : {
-				source : [["MM:BH", 4]],
+				source : [["SGttEH:J", 4]],
 				name : "Rite of the Roar",
 				description : " [thunder damage]",
 				prereqeval : function() { return classes.known['blood hunter'].level >= 14 }
@@ -240,7 +359,7 @@ ClassList["jaeger"] = {
 				atkAdd : [
 					function (fields, v) {
 						if (!v.isSpell && (/\brite\b/i).test(v.WeaponTextName)) {
-							fields.Description += (fields.Description ? '; ' : '') + '+' + MMBH_BhHemocraftDie(classes.known['blood hunter'].level) + ' rite damage';
+							fields.Description += (fields.Description ? '; ' : '') + '+' + SGttEHJ_MomentumDie(classes.known['blood hunter'].level) + ' rite damage';
 						}
 					},
 					"If I include the word 'Rite' in a weapon's name, it gets my hemocraft damage die added in its description."
@@ -249,7 +368,7 @@ ClassList["jaeger"] = {
 		},
 		"fighting style" : {
 			name : "Fighting Style",
-			source : [["MM:BH", 3]],
+			source : [["SGttEH:J", 3]],
 			minlevel : 2,
 			description : '\n   Choose a Fighting Style using the "Choose Feature" button above',
 			choices : ["Archery", "Dueling", "Great Weapon Fighting", "Two-Weapon Fighting"],
@@ -260,7 +379,7 @@ ClassList["jaeger"] = {
 		},
 		"subclassfeature3" : {
 			name : "Blood Hunter Order",
-			source : [["MM:BH", 4]],
+			source : [["SGttEH:J", 4]],
 			minlevel : 3,
 			description : desc([
 				'Choose a Blood Hunter Order you commit to and put it in the "Class" field',
@@ -269,7 +388,7 @@ ClassList["jaeger"] = {
 		},
 		"brand of castigation": {
 			name : "Brand of Castigation",
-			source : [["MM:BH", 4]],
+			source : [["SGttEH:J", 4]],
 			minlevel : 6,
 			description : levels.map(function (n) {
 				var castigationDescr = [
@@ -288,13 +407,13 @@ ClassList["jaeger"] = {
 		},
 		"grim psychometry" : {
 			name : "Grim Psychometry",
-			source : [["MM:BH", 4]],
+			source : [["SGttEH:J", 4]],
 			minlevel : 9,
 			description : "\n   I have adv. on Int (History) checks about an object I'm touching or a location where I am"
 		},
 		"dark augmentation" : {
 			name : "Dark Augmentation",
-			source : [["MM:BH", 4]],
+			source : [["SGttEH:J", 4]],
 			minlevel : 10,
 			description : "\n   I have +5 ft speed and add my Int modifier (min 1) to my Str, Dex, and Con saves",
 			speed : { allModes : "+5" },
@@ -311,7 +430,7 @@ ClassList["jaeger"] = {
 		},
 		"brand of tethering" : {
 			name : "Brand of Tethering",
-			source : [["MM:BH", 4]],
+			source : [["SGttEH:J", 4]],
 			minlevel : 13,
 			description : " [Castigation deals 2× Int mod damage]" + desc([
 				"A branded target can't use Dash; It must succeed on a Wis save to teleport or plane shift",
@@ -320,14 +439,14 @@ ClassList["jaeger"] = {
 		},
 		"hardened soul" : {
 			name : "Hardened Soul",
-			source : [["MM:BH", 5]],
+			source : [["SGttEH:J", 5]],
 			minlevel : 14,
 			description : " [adv. on saves vs. being frightened/charmed]",
 			savetxt : { adv_vs : ["frightened", "charmed"] }
 		},
 		"sanguine mastery" : {
 			name : "Sanguine Mastery",
-			source : [["MM:BH", 5]],
+			source : [["SGttEH:J", 5]],
 			minlevel : 20,
 			description : desc([
 				"Once per turn when a feature requires a hemocraft die, I can reroll and choose the result",
@@ -349,20 +468,20 @@ ClassList["jaeger"] = {
 				"I revert back to my normal form if I fall unconscious, drop to 0 HP, or die",
 				"While I am in this hybrid form, I gain the following features:"
 			]);
-			theText += "\n\u25C6 Feral Might (Order of the Lycan 3, MM:BH 10)" + desc([
+			theText += "\n\u25C6 Feral Might (Order of the Lycan 3, SGttEH:J 10)" + desc([
 				"I gain +" + atkBonus + " on melee damage rolls; I have advantage on Str checks and saves"
 			]);
-			theText += "\n\u25C6 Resilient Hide (Order of the Lycan 3, MM:BH 10)" + desc([
+			theText += "\n\u25C6 Resilient Hide (Order of the Lycan 3, SGttEH:J 10)" + desc([
 				"I gain resistance to nonmagical bludgeoning, piercing, and slashing damage",
 				"Attacks that are made by silvered weapons bypass this resistance",
 				"I gain +1 bonus to AC while I am not wearing heavy armor"
 			]);
-			theText += "\n\u25C6 Predatory Strikes (Order of the Lycan 3, MM:BH 10)" + desc([
+			theText += "\n\u25C6 Predatory Strikes (Order of the Lycan 3, SGttEH:J 10)" + desc([
 				"My unarmed strikes are more powerful and can be imbued with a crimson rite",
 				"They deal " + PSdie + " slashing damage and I can use either Dex or Str with them",
 				"When I use them during an Attack action, I can make another as a bonus action"
 			]);
-			theText += "\n\u25C6 Bloodlust (Order of the Lycan 3, MM:BH 10)" + desc([
+			theText += "\n\u25C6 Bloodlust (Order of the Lycan 3, SGttEH:J 10)" + desc([
 				"I must make a Wisdom save if I start my turn with no more than half my max HP",
 				"This has DC 8; " + (lvl < 15 ? "" : "I have advantage on this save;") + "If I fail, I go into a frenzy",
 				"I automatically fail if I am under an effect that prevents concentrating (like Rage)",
@@ -371,13 +490,13 @@ ClassList["jaeger"] = {
 				"After this Attack action, I regain control and can continue my turn"
 			]);
 			if (lvl >= 7) {
-				theText += "\n\u25C6 Improved Predatory Strikes (Order of the Lycan 7, MM:BH 11)" + desc([
+				theText += "\n\u25C6 Improved Predatory Strikes (Order of the Lycan 7, SGttEH:J 11)" + desc([
 					"My predatory strikes gain a +" + atkBonus + " bonus on attack rolls",
 					"If I have an active crimson rite, my predatory strikes are considered magical"
 				]);
 			}
 			if (lvl >= 11) {
-				theText += "\n\u25C6 " + "Lycan Regeneration (Order of the Lycan 11, MM:BH 11)" + desc([
+				theText += "\n\u25C6 " + "Lycan Regeneration (Order of the Lycan 11, SGttEH:J 11)" + desc([
 					"If I have less than half my max HP at the start of my turn, I heal myself",
 					"I regain 1 + Constitution modifier HP (min 1); This doesn't work if I'm at 0 HP"
 				]);
@@ -394,12 +513,12 @@ ClassList["jaeger"] = {
 AddSubClass("blood hunter", "ghostslayer", {
 	regExpSearch : /^(?=.*ghost)(?=.*slayer).*$/i,
 	subname : "Order of the Ghostslayer",
-	source : [["MM:BH", 5]],
+	source : [["SGttEH:J", 5]],
 	fullname : "Ghostslayer",
 	features : {
 		"subclassfeature3" : {
 			name : "Curse Specialist",
-			source : [["MM:BH", 5]],
+			source : [["SGttEH:J", 5]],
 			minlevel : 3,
 			description : "\n   I gain an extra blood maledict use; My curses can always affect creatures without blood",
 			eval : function (v) {
@@ -411,7 +530,7 @@ AddSubClass("blood hunter", "ghostslayer", {
 			"primal rite of the dawn" : {
 				name : "Rite of the Dawn",
 				extraname : "Crimson Rite",
-				source : [["MM:BH", 5]],
+				source : [["SGttEH:J", 5]],
 				description : " [radiant damage]" + desc([
 					"While this rite is active, my weapon deals an extra hemocraft die of rite damage vs. undead",
 					"Also, my weapon sheds 20-ft radius bright light and I gain resistance to necrotic damage"
@@ -423,7 +542,7 @@ AddSubClass("blood hunter", "ghostslayer", {
 		},
 		"subclassfeature7" : {
 			name : "Ethereal Step",
-			source : [["MM:BH", 5]],
+			source : [["SGttEH:J", 5]],
 			minlevel : 7,
 			description : desc([
 				"At the start of my turn, if I'm not incapacitated, I can choose to step between planes",
@@ -437,7 +556,7 @@ AddSubClass("blood hunter", "ghostslayer", {
 		},
 		"subclassfeature11" : {
 			name : "Brand of Sundering",
-			source : [["MM:BH", 6]],
+			source : [["SGttEH:J", 6]],
 			minlevel : 11,
 			description : desc([
 				"If I damage a branded creature with a weapon with an active crimson rite, I sunder it",
@@ -447,7 +566,7 @@ AddSubClass("blood hunter", "ghostslayer", {
 				atkAdd : [
 					function (fields, v) {
 						if (!v.isSpell && (/\brite\b/i).test(v.WeaponTextName)) {
-							fields.Description += (fields.Description ? '; ' : '') + '+' + MMBH_BhHemocraftDie(classes.known['blood hunter'].level) + ' rite damage vs. branded creature';
+							fields.Description += (fields.Description ? '; ' : '') + '+' + SGttEHJ_MomentumDie(classes.known['blood hunter'].level) + ' rite damage vs. branded creature';
 						}
 					},
 					"If I include the word 'Rite' in a weapon's name, it gets an additional hemocraft die if target is branded."
@@ -456,7 +575,7 @@ AddSubClass("blood hunter", "ghostslayer", {
 			"blood curse of the exorcist" : {
 				name : "Blood Curse of the Exorcist",
 				extraname : "Order of the Ghostslayer 15; Blood Curse",
-				source : [["MM:BH", 11]],
+				source : [["SGttEH:J", 11]],
 				description : desc([
 					"As a bonus action, I stop a target I can see in 30 ft being frightened, charmed, or possessed",
 					"\u2022 Amplify: The creature that caused the stopped condition takes 4d6 psychic damage",
@@ -471,7 +590,7 @@ AddSubClass("blood hunter", "ghostslayer", {
 		},
 		"subclassfeature18" : {
 			name : "Rite Revival",
-			source : [["MM:BH", 6]],
+			source : [["SGttEH:J", 6]],
 			minlevel : 18,
 			description : "\n   If I drop to 0 HP, but I'm not killed, I can end a crimson rite to instead stay at 1 HP"
 		}
@@ -481,7 +600,7 @@ AddSubClass("blood hunter", "ghostslayer", {
 AddSubClass("blood hunter", "profane soul", {
 	regExpSearch : /^(?=.*profane)(?=.*soul).*$/i,
 	subname : "Order of the Profane Soul",
-	source : ["MM:BH", 7],
+	source : ["SGttEH:J", 7],
 	spellcastingFactor : "warlock3",
 	spellcastingTable : [
 		[0, 0, 0, 0, 0, 0, 0, 0, 0], //lvl 0
@@ -517,7 +636,7 @@ AddSubClass("blood hunter", "profane soul", {
 	features : {
 		"subclassfeature3" : {
 			name : "Otherwordly Patron",
-			source : [["MM:BH", 7]],
+			source : [["SGttEH:J", 7]],
 			minlevel : 3,
 			description : '\n   Choose an Otherwordly Patron using the "Choose Feature" button above',
 			choices : ["the Archfey", "the Fiend", "the Great Old One", "the Undying", "the Celestial", "the Hexblade"],
@@ -543,14 +662,14 @@ AddSubClass("blood hunter", "profane soul", {
 				name : "Rite Focus: the Undying",
 				description : "\n   When I reduce a hostile creature to 0 HP using an active rite weapon, I heal HP",
 				additional : levels.map(function (n) {
-					return n < 3 ? "" : "regain " + MMBH_BhHemocraftDie(n) + " HP";
+					return n < 3 ? "" : "regain " + SGttEHJ_MomentumDie(n) + " HP";
 				})
 			},
 			"the celestial" : {
 				name : "Rite Focus: the Celestial",
 				description : "\n   As a bonus action, I can expend a blood maledict use to heal a creature I can see in 60 ft",
 				additional : levels.map(function (n) {
-					return n < 3 ? "" : "heals " + MMBH_BhHemocraftDie(n) + "+Int mod";
+					return n < 3 ? "" : "heals " + SGttEHJ_MomentumDie(n) + "+Int mod";
 				}),
 				action : [["bonus action", ""]]
 			},
@@ -566,7 +685,7 @@ AddSubClass("blood hunter", "profane soul", {
 		},
 		"subclassfeature3.1" : {
 			name : "Pact Magic",
-			source : [["MM:BH", 6]],
+			source : [["SGttEH:J", 6]],
 			minlevel : 3,
 			description : desc([
 				"I can cast warlock cantrips/spells that I know, using Intelligence as my spellcasting ability",
@@ -580,14 +699,14 @@ AddSubClass("blood hunter", "profane soul", {
 		},
 		"subclassfeature7" : {
 			name : "Mystic Frenzy",
-			source : [["MM:BH", 7]],
+			source : [["SGttEH:J", 7]],
 			minlevel : 7,
 			description : "\n   When I cast a cantrip as an action, I can make one weapon attack as a bonus action",
 			action : [["bonus action", " (with cantrip)"]]
 		},
 		"subclassfeature7.1" : {
 			name : "Revealed Arcana",
-			source : [["MM:BH", 7]],
+			source : [["SGttEH:J", 7]],
 			minlevel : 7,
 			description : '\n   Choose an Otherwordly Patron using the "Choose Feature" button above',
 			usages : 1,
@@ -655,13 +774,13 @@ AddSubClass("blood hunter", "profane soul", {
 		},
 		"subclassfeature11" : {
 			name : "Brand of the Sapping Scar",
-			source : [["MM:BH", 7]],
+			source : [["SGttEH:J", 7]],
 			minlevel : 11,
 			description : "\n   A creature branded by me has disadvantage on their saves against my warlock spells"
 		},
 		"subclassfeature15" : {
 			name : "Unsealed Arcana",
-			source : [["MM:BH", 7]],
+			source : [["SGttEH:J", 7]],
 			minlevel : 15,
 			description : '\n   Choose an Otherwordly Patron using the "Choose Feature" button above',
 			usages : 1,
@@ -729,7 +848,7 @@ AddSubClass("blood hunter", "profane soul", {
 			"blood curse of the souleater" : {
 				name : "Blood Curse of the Souleater",
 				extraname : "Order of the Profane Soul 18; Blood Curse",
-				source : [["MM:BH", 12]],
+				source : [["SGttEH:J", 12]],
 				description : " [Amplify 1\xD7 per long rest]" + desc([
 					"As a reaction when a living creature (not construct/undead) is reduced to 0 HP in 30 ft,",
 					"I can use their soul to gain advantage on my weapon attacks until the end of my next turn",
@@ -753,11 +872,11 @@ AddSubClass("blood hunter", "profane soul", {
 AddSubClass("blood hunter", "mutant", {
 	regExpSearch : /^(?=.*blood)(?=.*hunter)(?=.*mutant).*$/i,
 	subname : "Order of the Mutant",
-	source : [["MM:BH", 8]],
+	source : [["SGttEH:J", 8]],
 	features : {
 		"subclassfeature3" : {
 			name : "Mutagencraft",
-			source : [["MM:BH", 8]],
+			source : [["SGttEH:J", 8]],
 			minlevel : 3,
 			description : levels.map(function (n) {
 				return n < 3 ? "" : desc([
@@ -802,7 +921,7 @@ AddSubClass("blood hunter", "mutant", {
 			}),
 			"aether (prereq: level 11 blood hunter)" : {
 				name : "Aether",
-				source : [["MM:BH", 8]],
+				source : [["SGttEH:J", 8]],
 				description : desc([
 					"I gain 20 ft flying speed for 1 hour",
 					"\u2022 Side effect: I gain disadvantage on Strength and Dexterity ability checks for 1 hour"
@@ -811,7 +930,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"alluring" : {
 				name : "Alluring",
-				source : [["MM:BH", 8]],
+				source : [["SGttEH:J", 8]],
 				description : desc([
 					"I gain advantage on Charisma ability checks",
 					"\u2022 Side effect: I gain disadvantage on Initiative rolls"
@@ -819,7 +938,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"celerity" : {
 				name : "Celerity",
-				source : [["MM:BH", 8]],
+				source : [["SGttEH:J", 8]],
 				description : levels.map(function (n) {
 					var descr = n < 11 ? "My Dex score and max increase by 3. They increase by 4 at level 11 and by 5 at level 18" : n < 18 ? "My Dexterity score and maximum Dexterity increase by 4. They increase by 5 at level 18" : "My Dexterity score and maximum Dexterity both increase by 5";
 					return desc([
@@ -830,7 +949,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"conversant" : {
 				name : "Conversant",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : desc([
 					"I gain advantage on Intelligence ability checks",
 					"\u2022 Side effect: I gain disadvantage on Wisdom ability checks"
@@ -838,7 +957,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"cruelty (prereq: level 11 blood hunter)" : {
 				name : "Cruelty",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : desc([
 					"As part of an Attack action, I can make a single weapon attack as a bonus action",
 					"\u2022 Side effect: I gain disadvantage on Intelligence, Wisdom, and Charisma saving throws"
@@ -848,7 +967,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"deftness" : {
 				name : "Deftness",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : desc([
 					"I gain advantage on Dexterity ability checks",
 					"\u2022 Side effect: I gain disadvantage on Wisdom ability checks"
@@ -856,7 +975,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"embers" : {
 				name : "Embers",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : desc([
 					"I gain resistance to fire damage",
 					"\u2022 Side effect: I gain vulnerability to cold damage"
@@ -864,7 +983,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"gelid" : {
 				name : "Gelid",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : desc([
 					"I gain resistance to cold damage",
 					"\u2022 Side effect: I gain vulnerability to fire damage"
@@ -872,7 +991,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"impermeable" : {
 				name : "Impermeable",
-				source : ["MM:BH", 10],
+				source : ["SGttEH:J", 10],
 				description : desc([
 					"I gain resistance to piercing damage",
 					"\u2022 Side effect: I gain vulnerability to slashing damage"
@@ -880,7 +999,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"mobile" : {
 				name : "Mobile",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : levels.map(function (n) {
 					var descr = n < 11 ? "I gain immunity to the grappled and restrained conditions; At 11th level also paralyzed" : "I gain immunity to the grappled, restrained, and paralyzed conditions";
 					return desc([
@@ -891,7 +1010,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"nighteye" : {
 				name : "Nighteye",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : desc([
 					"I gain darkvision up to 60 ft, or add an extra 60 ft to it if I already have darkvision",
 					"\u2022 Side effect: I gain sunlight sensitivity"
@@ -899,7 +1018,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"percipient" : {
 				name : "Percipient",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : desc([
 					"I gain advantage on Wisdom ability checks",
 					"\u2022 Side effect: I gain disadvantage on Charisma ability checks"
@@ -907,7 +1026,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"potency" : {
 				name : "Potency",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : levels.map(function (n) {
 					var descr = n < 11 ? "My Str score and max increase by 3. They increase by 4 at level 11 and by 5 at level 18" : n < 18 ? "My Strength score and maximum Strength increase by 4. They increase by 5 at level 18" : "My Strength score and maximum Strength both increase by 5";
 					return desc([
@@ -918,7 +1037,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"precision (prereq: level 11 blood hunter)" : {
 				name : "Precision",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : desc([
 					"My weapon attacks score critical hits on attack rolls of 19 and 20",
 					"\u2022 Side effect: I gian disadvantage on Strength saving throws"
@@ -927,7 +1046,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"rapidity" : {
 				name : "Rapidity",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : levels.map(function (n) {
 					var descr = n < 15 ? "My speed increases by 10 ft (or by 15 ft at 15th level)" : "My speed increases by 15 ft";
 					return desc([
@@ -938,7 +1057,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"reconstruction (prereq: level 7 blood hunter)" : {
 				name : "Reconstruction",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : desc([
 					"For an hour, at the start of my turn, I regain hit points equal to my proficiency bonus",
 					"This only occurs if I have at least 1 hit point and am below half my hit point maximum",
@@ -948,7 +1067,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"sagacity" : {
 				name : "Sagacity",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : levels.map(function (n) {
 					var descr = n < 11 ? "My Int score and max increase by 3. They increase by 4 at level 11 and by 5 at level 18" : n < 18 ? "My Intelligence score and maximum both increase by 4. They increase by 5 at level 18" : "My Intelligence score and maximum Intelligence both increase by 5";
 					return desc([
@@ -959,7 +1078,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"shielded" : {
 				name : "Shielded",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : desc([
 					"I gain resistance to slashing damage",
 					"\u2022 Side effect: I gain vulnerability to bludgeoning damage"
@@ -967,7 +1086,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"unbreakable" : {
 				name : "Unbreakable",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : desc([
 					"I gain resistance to bludgeoning damage",
 					"\u2022 Side effect: I gain vulnerability to piercing damage"
@@ -975,7 +1094,7 @@ AddSubClass("blood hunter", "mutant", {
 			},
 			"vermillion" : {
 				name : "Vermillion",
-				source : [["MM:BH", 9]],
+				source : [["SGttEH:J", 9]],
 				description : desc([
 					"I gain an additional use of blood maledict",
 					"\u2022 Side effect: I gain disadvantage on death saving throws"
@@ -984,7 +1103,7 @@ AddSubClass("blood hunter", "mutant", {
 		},
 		"subclassfeature7" : {
 			name : "Strange Metabolism",
-			source : [["MM:BH", 8]],
+			source : [["SGttEH:J", 8]],
 			minlevel : 7,
 			description : desc([
 				"I gain immunity to poison damage and the poisoned condition",
@@ -997,7 +1116,7 @@ AddSubClass("blood hunter", "mutant", {
 		},
 		"subclassfeature11" : {
 			name : "Brand of Axiom",
-			source : [["MM:BH", 8]],
+			source : [["SGttEH:J", 8]],
 			minlevel : 11,
 			description : desc([
 				"A branded creature can't benefit from illusion magic to disguise it or make it invisible",
@@ -1007,7 +1126,7 @@ AddSubClass("blood hunter", "mutant", {
 			"blood curse of corrosion" : {
 				name : "Blood Curse of Corrosion",
 				extraname : "Order of the Mutant 15; Blood Curse",
-				source : [["MM:BH", 11]],
+				source : [["SGttEH:J", 11]],
 				description : desc([
 					"As a bonus action, I can have a creature within 30 ft make a Con save or become poisoned",
 					"At the end of each if its turns, the creature can make another Con save to end the curse",
@@ -1022,7 +1141,7 @@ AddSubClass("blood hunter", "mutant", {
 		},
 		"subclassfeature18" : {
 			name : "Exalted Mutation",
-			source : [["MM:BH", 8]],
+			source : [["SGttEH:J", 8]],
 			minlevel : 18,
 			description : desc([
 				"As a bonus action, I can end an active mutagen, then activate a mutagen that I know"
@@ -1038,18 +1157,18 @@ AddSubClass("blood hunter", "mutant", {
 AddSubClass("blood hunter", "lycan", {
 	regExpSearch : /^(?=.*blood)(?=.*hunter)(?=.*lycan).*$/i,
 	subname : "Order of the Lycan",
-	source : [["MM:BH", 9]],
+	source : [["SGttEH:J", 9]],
 	features : {
 		"subclassfeature3" : {
 			name : "Heightened Senses",
-			source : [["MM:BH", 10]],
+			source : [["SGttEH:J", 10]],
 			minlevel : 3,
 			description : "\n   I gain advantage on Wisdom (Perception) checks that rely on hearing or smell",
 			vision : [["Adv. on Perception relying on hearing or smell", 0]]
 		},
 		"subclassfeature3.1" : {
 			name : "Hybrid Transformation",
-			source : [["MM:BH", 10]],
+			source : [["SGttEH:J", 10]],
 			minlevel : 3,
 			description : desc([
 				"As a bonus action, I can transform into a hybrid lycanthropy form",
@@ -1064,7 +1183,7 @@ AddSubClass("blood hunter", "lycan", {
 				baseWeapon : "unarmed strike",
 				regExpSearch : /^(?=.*predatory)(?=.*strike).*$/i,
 				name : "Predatory Strike",
-				source : [["MM:BH", 10]],
+				source : [["SGttEH:J", 10]],
 				description : "Finesse; Only in hybrid form; If used in Attack action, attack once as bonus action",
 				damage : [1, 6, "slashing"],
 				isPredatoryStrikes : true
@@ -1086,7 +1205,7 @@ AddSubClass("blood hunter", "lycan", {
 		},
 		"subclassfeature7" : {
 			name : "Stalker's Prowess",
-			source : [["MM:BH", 11]],
+			source : [["SGttEH:J", 11]],
 			minlevel : 7,
 			description : desc([
 				"I gain +10 ft speed; I add +10 ft to my long jump and +3 ft to my high jump distance",
@@ -1115,7 +1234,7 @@ AddSubClass("blood hunter", "lycan", {
 		},
 		"subclassfeature11" : {
 			name : "Advanced Transformation",
-			source : [["MM:BH", 11]],
+			source : [["SGttEH:J", 11]],
 			minlevel : 11,
 			description : '\n   In my hybrid form, I gain the Lycan Regeneration feature, see "Notes" page',
 			calcChanges : {
@@ -1138,7 +1257,7 @@ AddSubClass("blood hunter", "lycan", {
 		},
 		"subclassfeature15" : {
 			name : "Brand of the Voracious",
-			source : [["MM:BH", 11]],
+			source : [["SGttEH:J", 11]],
 			minlevel : 15,
 			description : desc([
 				"I have advantage on my Wisdom saves to maintain control of blood lust in hybrid form",
@@ -1146,7 +1265,7 @@ AddSubClass("blood hunter", "lycan", {
 			]),
 			savetxt : { text : ["Adv. on Wis saves to control blood lust"] },
 			"blood curse of the howl" : {
-				source : [["MM:BH", 12]],
+				source : [["SGttEH:J", 12]],
 				name : "Blood Curse of the Howl",
 				extraname : "Order of the Lycan 18; Blood Curse",
 				description : desc([
