@@ -461,139 +461,45 @@ ClassList["jaeger"] = {
 		},
 		"relentless pursuit" : {
 			name : "Relentless Pursuit",
-			source
+			source : [["SGttEH:J", 117]],
 			minLevel : 13,
-			description : desc("Starting at 13th level, when you use your Hunter's Pursuit, if you end your movement next to a hostile creature, you regain the expended Focus Point.")
+			description : desc("Starting at 13th level, when I use my Hunter's Pursuit, if I end my movement next to a hostile creature, I regain the expended Focus Point.")
 		},
-		"brand of castigation": {
-			name : "Brand of Castigation",
-			source : [["SGttEH:J", 4]],
-			minlevel : 6,
-			description : levels.map(function (n) {
-				var castigationDescr = [
-					"I can brand a creature I damage with my crimson rite; I then know the direction to it",
-					"This lasts until I dismiss it or brand another; It can be dispelled as a spell of half my level",
-					"If it damages me or a creature in 5 ft, it takes my Int mod in psychic damage (min 1)"
-				];
-				var tetheringDescr = castigationDescr.slice(0,2).concat(["If it damages me or another in 5 ft, it takes 2× my Int mod in psychic damage (min 2)"]);
-				return n < 6 ? "" : desc(n < 13 ? castigationDescr : tetheringDescr);
-			}),
-			usages : 1,
-			recovery : "short rest",
-			additional : levels.map(function (n) {
-				return n < 6 ? "" : spellLevelList[Math.min(9, Math.floor(n/2))] + " to dispel";
-			})
-		},
-		"grim psychometry" : {
-			name : "Grim Psychometry",
-			source : [["SGttEH:J", 4]],
-			minlevel : 9,
-			description : "\n   I have adv. on Int (History) checks about an object I'm touching or a location where I am"
-		},
-		"dark augmentation" : {
-			name : "Dark Augmentation",
-			source : [["SGttEH:J", 4]],
-			minlevel : 10,
-			description : "\n   I have +5 ft speed and add my Int modifier (min 1) to my Str, Dex, and Con saves",
-			speed : { allModes : "+5" },
-			addMod : [{
-				type : "save", field : "Str", mod : "max(Int|1)",
-				text : "I add my Intelligence modifier (min 1) to my Strength, Dexterity, and Constitution saving throws"
-			}, {
-				type : "save", field : "Dex", mod : "max(Int|1)",
-				text : "I add my Intelligence modifier (min 1) to my Strength, Dexterity, and Constitution saving throws"
-			}, {
-				type : "save", field : "Con", mod : "max(Int|1)",
-				text : "I add my Intelligence modifier (min 1) to my Strength, Dexterity, and Constitution saving throws"
-			}]
-		},
-		"brand of tethering" : {
-			name : "Brand of Tethering",
-			source : [["SGttEH:J", 4]],
-			minlevel : 13,
-			description : " [Castigation deals 2× Int mod damage]" + desc([
-				"A branded target can't use Dash; It must succeed on a Wis save to teleport or plane shift",
-				"It takes 4d6 psychic damage when trying to teleport/plane shift, regardless of the save"
-			])
-		},
-		"hardened soul" : {
-			name : "Hardened Soul",
-			source : [["SGttEH:J", 5]],
-			minlevel : 14,
-			description : " [adv. on saves vs. being frightened/charmed]",
-			savetxt : { adv_vs : ["frightened", "charmed"] }
-		},
-		"sanguine mastery" : {
-			name : "Sanguine Mastery",
-			source : [["SGttEH:J", 5]],
-			minlevel : 20,
+		"inured to madness" : {
+			name : "Inured To Madness",
+			source : [["SGttEH:J", 117]],
+			minLevel : 15,
 			description : desc([
-				"Once per turn when a feature requires a hemocraft die, I can reroll and choose the result",
-				"When I score a critical hit with a rite-imbued weapon, I regain one use of blood maledict"
-			])
+				"At 15th level, I gain advantage on saving throws against being charmed or frightened, and against",
+				"effects that cause madness. If I fail a saving throw against madness, I can expend 1 Focus Point to reroll",
+				"the die. I must use the new roll."
+			]),
+			savetxt : { adv_vs : ["frightened", "charmed", "madness"] }
+		},
+		"eternal watch" : {
+			name : "Eternal Watch",
+			source : [["SGttEH:J", 117]],
+			minLevel : 18,
+			description : desc("Starting at 18th level, I am always under the effect of Piercing Gaze.")
+		},
+		"alsways ready" : {
+			name : "Always Ready",
+			source : [["SGttEH:J", 117]],
+			minLevel : 20,
+			description : desc([
+				"Starting at 20th level, once per round (beginning at the start of each of my turns), I gain one",
+				"additional reaction, which I can only use on a Focus Art that requires a reaction (such as Weapon Parry or",
+				"Dodge Step). When I expend a Focus Point on this special reaction, I immediately regain the expended Focus Point."
+			]),
 		}
 	},
-	updateHybridForm : function(BHlevelOld, BHlevelNew) {
-		if (BHlevelOld <= 2 && BHlevelNew <= 2) return;
-		//a function to create the full text for the hybrid feature
-		var makeHybridText = function(lvl) {
-			if (lvl < 3) return "";
-			var PSdie = lvl < 11 ? "d6" : "d8";
-			var atkBonus = lvl < 11 ? 1 : lvl < 18 ? 2 : 3;
-			var theText = "Blood Hunter (Order of the Lycan) Hybrid Form, at level " + lvl + ":" + desc([
-				"As a bonus action, I can transform into a hybrid lycanthropy form",
-				"This form lasts " + (lvl < 18 ? "for an hour or " : "") + "until I transform back as a bonus action",
-				"I can speak, use equipment, and wear armor in this form",
-				"I revert back to my normal form if I fall unconscious, drop to 0 HP, or die",
-				"While I am in this hybrid form, I gain the following features:"
-			]);
-			theText += "\n\u25C6 Feral Might (Order of the Lycan 3, SGttEH:J 10)" + desc([
-				"I gain +" + atkBonus + " on melee damage rolls; I have advantage on Str checks and saves"
-			]);
-			theText += "\n\u25C6 Resilient Hide (Order of the Lycan 3, SGttEH:J 10)" + desc([
-				"I gain resistance to nonmagical bludgeoning, piercing, and slashing damage",
-				"Attacks that are made by silvered weapons bypass this resistance",
-				"I gain +1 bonus to AC while I am not wearing heavy armor"
-			]);
-			theText += "\n\u25C6 Predatory Strikes (Order of the Lycan 3, SGttEH:J 10)" + desc([
-				"My unarmed strikes are more powerful and can be imbued with a crimson rite",
-				"They deal " + PSdie + " slashing damage and I can use either Dex or Str with them",
-				"When I use them during an Attack action, I can make another as a bonus action"
-			]);
-			theText += "\n\u25C6 Bloodlust (Order of the Lycan 3, SGttEH:J 10)" + desc([
-				"I must make a Wisdom save if I start my turn with no more than half my max HP",
-				"This has DC 8; " + (lvl < 15 ? "" : "I have advantage on this save;") + "If I fail, I go into a frenzy",
-				"I automatically fail if I am under an effect that prevents concentrating (like Rage)",
-				"If I fail, I must move to the nearest creature (randomize if multiple) and attack it",
-				"I must use the Attack action, but may choose not to use my Extra Attack feature",
-				"After this Attack action, I regain control and can continue my turn"
-			]);
-			if (lvl >= 7) {
-				theText += "\n\u25C6 Improved Predatory Strikes (Order of the Lycan 7, SGttEH:J 11)" + desc([
-					"My predatory strikes gain a +" + atkBonus + " bonus on attack rolls",
-					"If I have an active crimson rite, my predatory strikes are considered magical"
-				]);
-			}
-			if (lvl >= 11) {
-				theText += "\n\u25C6 " + "Lycan Regeneration (Order of the Lycan 11, SGttEH:J 11)" + desc([
-					"If I have less than half my max HP at the start of my turn, I heal myself",
-					"I regain 1 + Constitution modifier HP (min 1); This doesn't work if I'm at 0 HP"
-				]);
-			}
-			return theText;
-		};
-		//update the hybrid feature on the notes page
-		var BHstringOld = makeHybridText(BHlevelOld);
-		var BHstringNew = makeHybridText(BHlevelNew);
-		if (BHstringOld != BHstringNew) AddToNotes(BHstringNew, "Blood Hunter (Order of the Lycan) Hybrid form features", BHstringOld, "Class Features section");
-	}
 };
 
-AddSubClass("blood hunter", "ghostslayer", {
+AddSubClass("jaeger", "absolute", {
 	regExpSearch : /^(?=.*ghost)(?=.*slayer).*$/i,
-	subname : "Order of the Ghostslayer",
+	subname : "Absolute Chapter",
 	source : [["SGttEH:J", 5]],
-	fullname : "Ghostslayer",
+	fullname : "Absolute",
 	features : {
 		"subclassfeature3" : {
 			name : "Curse Specialist",
