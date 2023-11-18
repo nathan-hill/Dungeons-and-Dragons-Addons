@@ -37,6 +37,68 @@ SGttEHJ_MomentumDie = function(n) {
 	return "1d" + (n < 5 ? 6 : n < 11 ? 8 : n < 17 ? 10);
 };
 
+// Different Fighting Styles for the Jaeger
+var FightingStyles = {
+	dueling : {
+		name : "Dueling Fighting Style",
+		description : desc("+2 to damage rolls when wielding a melee weapon in one hand and no other weapons"),
+		calcChanges : {
+			atkCalc : [
+				function (fields, v, output) {
+					for (var i = 1; i <= FieldNumbers.actions; i++) {
+						if ((/off.hand.attack/i).test(What('Bonus Action ' + i))) return;
+					};
+					if (v.isMeleeWeapon && !v.isNaturalWeapon && !(/((^|[^+-]\b)2|\btwo).?hand(ed)?s?\b/i).test(fields.Description)) output.extraDmg += 2;
+				},
+				"When I'm wielding a melee weapon in one hand and no weapon in my other hand, I do +2 damage with that melee weapon. This condition will always be false if the bonus action 'Off-hand Attack' exists."
+			]
+		}
+	},
+	great_weapon : {
+		name : "Great Weapon Fighting Style",
+		description : desc("Reroll 1 or 2 on damage if wielding two-handed/versatile melee weapon in both hands"),
+		calcChanges : {
+			atkAdd : [
+				function (fields, v) {
+					if (v.isMeleeWeapon && (/(\bversatile|((^|[^+-]\b)2|\btwo).?hand(ed)?s?)\b/i).test(fields.Description)) {
+						fields.Description += (fields.Description ? '; ' : '') + 'Re-roll 1 or 2 on damage die' + ((/versatile/i).test(fields.Description) ? ' when two-handed' : '');
+					}
+				},
+				"While wielding a two-handed or versatile melee weapon in two hands, I can re-roll a 1 or 2 on any damage die once."
+			]
+		}
+	},
+	flexible : {
+		name : "Flexible Fighting Style",
+		description : desc("+1 to damage when wielding both weapons"),
+		calcChanges : {
+			atkCalc : [
+				function (fields, v, output) {
+					if (v.isOffHand) output+1 = true;
+				},
+				"When I'm wielding 2 melee weapons, I do +1 damage with both weapons. This condition will always be true if the bonus action 'Off-hand Attack' exists."
+			]
+		}
+	},
+	focused : {
+		name : "Focused Fighting Style",
+		description : desc("I learn an additional Focus Art, and gain 1 additional Focus Point."),
+		// need help with this
+	},
+	two_weapon : {
+		name : "Two-Weapon Fighting Style",
+		description : desc("I can add my ability modifier to the damage of my off-hand attacks"),
+		calcChanges : {
+			atkCalc : [
+				function (fields, v, output) {
+					if (v.isOffHand) output.modToDmg = true;
+				},
+				"When engaging in two-weapon fighting, I can add my ability modifier to the damage of my off-hand attacks. If a melee weapon includes 'off-hand' or 'secondary' in its name or description, it is considered an off-hand attack."
+			]
+		}
+	}
+};
+
 ClassList["jaeger"] = {
 	regExpSearch : /^(?=.*jaeger).*$/i,
 	name : "Jaeger",
@@ -297,94 +359,111 @@ ClassList["jaeger"] = {
 			description : "",
 			additional : levels.map(SGttEHJ_MomentumDie)
 		},
-		"hunter's bane" : {
-			name : "Hunter's Bane",
-			source : [["SGttEH:J", 3]],
+		"flexible combatant" : {
+			name : "Flexible Combatant",
+			source : [["SGttEH:J", 115]],
 			minlevel : 1,
-			description : "\n   I get adv. on Int checks to recall info about, and Survival to track, fey, fiends, or undead"
-		},
-		"crimson rite" : {
-			name : "Crimson Rite",
-			source : [["SGttEH:J", 4]],
-			minlevel : 2,
 			description : desc([
-				"As a bonus action, I can imbue a weapon with a rite; A weapon can hold only one rite",
-				'When I do so, I take my hemocraft die in damage; Use "Choose Feature" button for rites',
-				"Imbued weapons deal extra damage equal to my hemocraft die of the rite's damage type",
-				"This lasts until I finish my next short or long rest or I'm not holding it as my turn ends"
-			]),
-			additional : levels.map(function (n) {
-				return (n < 6 ? 1 : 2) + " primal rite" + (n < 6 ? "" : n < 14 ? "s" : "s \u0026 1 esoteric rite") + " known";
-			}),
-			action : [["bonus action", ""]],
-			extraname : "Crimson Rite",
-			extrachoices : ["\x1BPrimal Rite of the Flame", "\x1BPrimal Rite of the Frozen", "\x1BPrimal Rite of the Storm", "Esoteric Rite of the Roar", "Esoteric Rite of the Oracle", "Esoteric Rite of the Dead"],
-			extraTimes : levels.map(function (n) {
-				return n < 6 ? 1 : n < 14 ? 2 : 3;
-			}),
-			"\x1Bprimal rite of the flame" : {
-				source : [["SGttEH:J", 4]],
-				name : "Rite of the Flame",
-				description : " [fire damage]"
-			},
-			"\x1Bprimal rite of the frozen" : {
-				source : [["SGttEH:J", 4]],
-				name : "Rite of the Frozen",
-				description : " [cold damage]"
-			},
-			"\x1Bprimal rite of the storm" : {
-				source : [["SGttEH:J", 4]],
-				name : "Rite of the Storm",
-				description : " [lightning damage]"
-			},
-			"esoteric rite of the dead" : {
-				source : [["SGttEH:J", 4]],
-				name : "Rite of the Dead",
-				description : " [necrotic damage]",
-				prereqeval : function() { return classes.known['blood hunter'].level >= 14 }
-			},
-			"esoteric rite of the oracle" : {
-				source : [["SGttEH:J", 4]],
-				name : "Rite of the Oracle",
-				description : " [psychic damage]",
-				prereqeval : function() { return classes.known['blood hunter'].level >= 14 }
-			},
-			"esoteric rite of the roar" : {
-				source : [["SGttEH:J", 4]],
-				name : "Rite of the Roar",
-				description : " [thunder damage]",
-				prereqeval : function() { return classes.known['blood hunter'].level >= 14 }
-			},
-			calcChanges : {
-				atkAdd : [
-					function (fields, v) {
-						if (!v.isSpell && (/\brite\b/i).test(v.WeaponTextName)) {
-							fields.Description += (fields.Description ? '; ' : '') + '+' + SGttEHJ_MomentumDie(classes.known['blood hunter'].level) + ' rite damage';
-						}
-					},
-					"If I include the word 'Rite' in a weapon's name, it gets my hemocraft damage die added in its description."
-				]
-			}
+				"Beginning at 1st level, I can draw or stow two onehanded weapons when I would normally be able to",
+				"draw or stow only one, and I can reload weapons with the loading, reload, or barrel properties without a free hand.",
+				"\nAdditionally, if I'm carrying a one-handed melee weapon in one hand, and a one-handed ranged weapon",
+				"in the other, I do not have disadvantage from being within 5 feet of a hostile creature on attacks made with that ranged weapon."
+			])
+		},
+		"eldritch hunter" : {
+			name : "Eldritch Hunter",
+			source : [["SGttEH:J", 115]],
+			minlevel : 1,
+			description : desc([
+				"Also at 1st level, when I make an ability check to track or identify an aberration, celestial, fiend, monstrosity, or",
+				"undead, I can add my proficiency bonus to the ability check. If I am already proficient in the ability check, I can double my proficiency bonus."
+			])
 		},
 		"fighting style" : {
-			name : "Fighting Style",
-			source : [["SGttEH:J", 3]],
-			minlevel : 2,
-			description : '\n   Choose a Fighting Style using the "Choose Feature" button above',
-			choices : ["Archery", "Dueling", "Great Weapon Fighting", "Two-Weapon Fighting"],
-			"archery" : FightingStyles.archery,
-			"dueling" : FightingStyles.dueling,
-			"great weapon fighting" : FightingStyles.great_weapon,
-			"two-weapon fighting" : FightingStyles.two_weapon
-		},
+				name : "Fighting Style",
+				source : [["SGttEH:J", 116]],
+				minlevel : 1,
+				description : desc('I adopt a style of fighting as my specialty. Choose one of the following options. I can’t take a Fighting Style option more than once, even if I later get to choose again.'),
+				choices : ["Dueling", "Great Weapon Fighting", "Flexible Fighting", "Focused Fighting", "Two-Weapon Fighting"],
+				"dueling" : FightingStyles.dueling,
+				"great weapon fighting" : FightingStyles.great_weapon,
+				"flexible fighting" : FightingStyles.flexible,
+				"Focused Fighting" : FightingStyles.focused,
+				"two-weapon fighting" : FightingStyles.two_weapon
+		},	
 		"subclassfeature3" : {
-			name : "Blood Hunter Order",
-			source : [["SGttEH:J", 4]],
+			name : "Jaeger Chapter",
+			source : [["SGttEH:J", 118]],
 			minlevel : 3,
 			description : desc([
-				'Choose a Blood Hunter Order you commit to and put it in the "Class" field',
-				"Choose either the Order of the Ghostslayer, Lycan, Mutant, or Profane Soul"
+				'I Choose a Jaeger Chapter to commit to and put it in the "Class" field',
+				"Choose either the Absolute, Heretic, Marauder, Salvation, or Sanguine Chapter"
 			])
+		},
+		"piercing gaze" : {
+			name : "Piercing Gaze",
+			source : [["SGttEH:J", 117]],
+			minLevel : 3,
+			description : desc([
+				"Also at 3rd level, I gain the ability to activate a magical sight at will (no action required), allowing me",
+				"to effortlessly pierce the gloom and see what lurks within. For 1 hour, I gain darkvision out to a range of",
+				"60 feet. If I already have darkvision, its range increases to 120 feet. This vision lets me see normally in",
+				"dim light and darkness, both magical and nonmagical. \nWhen I reach 7th level, I also gain the effect of see",
+				"invisibility for the duration, and when I reach 13th level, I additionally gain the effect of true seeing for the duration.",
+				"\nOnce I use this feature, I can’t use it again until I finish a long rest."
+			]),
+			recovery : "long rest",
+		},
+		"ability score improvement" : {
+			//don't know how to do this, invoke ability score improvements
+		},
+		"seasoned survivor" : {
+			name : "Seasoned Survivor",
+			source : [["SGttEH:J", 117]],
+			minLevel : 4,
+			description : desc([
+				"At 4th level, I gain advantage on Investigation checks made to find secret passages, interpret markings or messages left by",
+				"other creatures on walls or surfaces, or determine the fate of creatures from blood stains and remains."
+			])
+		},
+		"extra attack" : {
+			name : "Extra Attack",
+			source : [["SGttEH:J", 117]],
+			minLevel : 5,
+			description : desc([
+				"Beginning at 5th level, I can attack twice, instead of once, whenever I take the Attack action on my turn."
+			])
+		},
+		"hunter's pursuit" : {
+			name : "Hunter's Pursuit",
+			source : [["SGttEH:J", 117]],
+			minLevel : 6,
+			description : desc([
+				"Starting at 6th level, at the start of my turn, I can expend 1 Focus Point to immediately move up to half",
+				"my speed without using any of my movement and without provoking opportunity attacks."
+			])
+		},
+		"evasion" : {
+			name : "Evasion",
+			source : [["SGttEH:J", 117]],
+			minlevel : 9,
+			description : desc("My Dexterity saves vs. areas of effect negate damage on success and halve it on failure"),
+			savetxt : { text : ["Dex save vs. area effects: fail \u2015 half dmg, success \u2015 no dmg"] }
+		},
+		"lethal tempo" : {
+			name : "Lethal Tempo",
+			source : [["SGttEH:J", 117]],
+			minLevel : 11,
+			description : desc([
+				"Starting at 11th level, the first time I hit a creature on my turn, I gain 1 Momentum die. I gain 1",
+				"additional Momentum die any time I reduce a creature to 0 hit points."
+			])
+		},
+		"relentless pursuit" : {
+			name : "Relentless Pursuit",
+			source
+			minLevel : 13,
+			description : desc("Starting at 13th level, when you use your Hunter's Pursuit, if you end your movement next to a hostile creature, you regain the expended Focus Point.")
 		},
 		"brand of castigation": {
 			name : "Brand of Castigation",
